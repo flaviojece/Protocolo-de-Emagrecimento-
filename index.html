@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Meu Tratamento</title>
+  <meta name="theme-color" content="#6b73ff" />
+  <meta name="description" content="Acompanhamento do tratamento com Tirzepatida" />
+  <link rel="manifest" href="#" id="manifest-placeholder" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Meu Tratamento" />
+  <style>
+    :root{ --surface:#ffffff; --text:#0f172a; --shadow:0 10px 25px rgba(0,0,0,.08); }
+    *{box-sizing:border-box} html,body{height:100%}
+    body{ margin:0; background:linear-gradient(180deg,#6b73ff 0%,#7b68ee 30%,#6a5acd 60%,#4f46e5 100%);
+      min-height:100%; font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif; color:var(--text); display:flex; flex-direction:column; }
+    .container{width:100%; max-width:820px; margin:20px auto 80px auto; padding:0 14px;}
+    .panel{background:var(--surface); border-radius:24px; box-shadow:var(--shadow); padding:14px;}
+    .panel-header{background:#fff; border-radius:16px; box-shadow:0 8px 18px rgba(107,115,255,.15) inset; padding:16px 14px; text-align:center; margin-bottom:14px; border:1px solid #eef2ff;}
+    .title{font-size:20px; font-weight:800; color:#4451ff; display:flex; align-items:center; justify-content:center; gap:8px;}
+    .subtitle{margin-top:4px; font-size:12px; color:#6b7280;}
+    .name-bar{max-width:820px; margin:16px auto 8px auto; padding:0 14px; color:#eef2ff; font-size:13px;}
+    .grid{display:grid; gap:12px} .grid-2{grid-template-columns:1fr 1fr}
+    .card{background:#fff; border:1px solid #eef2ff; border-radius:16px; padding:18px 14px; box-shadow:var(--shadow); text-align:center;}
+    .card .emoji{font-size:22px} .card .big{font-size:22px; font-weight:800; color:#3b82f6; margin-top:8px}
+    .card .label{font-size:11px; color:#9aa3b2; letter-spacing:.02em; margin-top:4px}
+    .link-card{cursor:pointer; transition:transform .05s} .link-card:active{transform:scale(.98)}
+    .hint{display:flex; align-items:center; gap:8px; background:#e9f2ff; color:#2643a0; border:1px solid #dbeafe; border-radius:12px; padding:10px 12px; margin-top:12px; font-size:13px;}
+    .section{display:none; padding-top:12px} .section.active{display:block}
+    label{display:block; font-size:12px; color:#6b7280; margin-bottom:6px}
+    input,select,textarea{width:100%; padding:12px; border-radius:12px; border:1px solid #e5e7eb; outline:none; font-size:15px; background:#fff;}
+    input:focus,select:focus,textarea:focus{border-color:#93c5fd; box-shadow:0 0 0 3px rgba(59,130,246,.15)}
+    .row{display:grid; gap:12px} @media(min-width:680px){ .row-2{grid-template-columns:1fr 1fr} }
+    .btn{display:inline-flex; align-items:center; gap:8px; padding:10px 14px; border-radius:12px; border:1px solid #e5e7eb; background:#fff; cursor:pointer; font-weight:600}
+    .btn.primary{background:#4451ff; border-color:#4451ff; color:#fff}
+    .btn.warn{background:#fff7ed; color:#b45309; border-color:#fed7aa}
+    .btn.danger{background:#fee2e2; color:#991b1b; border-color:#fecaca}
+    .inline-actions{display:flex; gap:8px; flex-wrap:wrap}
+    .list{display:flex; flex-direction:column; gap:10px; margin-top:10px}
+    .item{display:flex; align-items:center; justify-content:space-between; background:#fff; border:1px solid #eef2ff; border-radius:12px; padding:10px 12px}
+    canvas{width:100%; height:220px; border:1px solid #eef2ff; border-radius:12px; background:#fff}
+    .bottom-bar{position:fixed; z-index:50; bottom:0; left:0; right:0; background:#ffffff; border-top:1px solid #e5e7eb; display:grid; grid-template-columns:repeat(7,1fr); padding:8px 6px;}
+    .tab-btn{display:flex; flex-direction:column; align-items:center; gap:6px; color:#6b7280; font-size:12px; background:transparent; border:0; cursor:pointer;}
+    .tab-btn .icon{font-size:18px} .tab-btn.active{color:#4451ff; font-weight:700}
+  </style>
+</head>
+<body>
+  <div class="name-bar">Paciente: <strong id="nameBar">Defina o nome abaixo</strong></div>
+
+  <div class="container">
+    <div class="panel">
+      <div class="panel-header">
+        <div class="title">💊 <span id="headerTitle">Meu Tratamento</span></div>
+        <div class="subtitle" id="headerSub">Dra. Aniele Andrade e Dr. Flavio Moura</div>
+      </div>
+
+      <!-- INÍCIO -->
+      <div class="section active" id="sec-home">
+        <div class="card" style="text-align:left">
+          <div class="row row-2">
+            <div>
+              <label for="patientName">Nome da paciente</label>
+              <input id="patientName" type="text" placeholder="Ex.: Maria Silva" />
+            </div>
+            <div style="display:flex; align-items:flex-end; gap:8px">
+              <button class="btn primary" id="saveNameBtn">Salvar nome</button>
+              <button class="btn" id="clearNameBtn">Limpar</button>
+            </div>
+          </div>
+          <div class="hint" id="iosHint" style="display:none">No iPhone: toque em Compartilhar e escolha “Adicionar à Tela de Início”.</div>
+        </div>
+
+        <!-- KPIs -->
+        <div class="grid grid-2" style="margin-top:12px">
+          <div class="card"><div class="emoji">⚖️</div><div class="big" id="kpiPeso">--</div><div class="label">PESO ATUAL (KG)</div></div>
+          <div class="card"><div class="emoji">📉</div><div class="big" id="kpiPerda">--</div><div class="label">PERDA TOTAL (KG)</div></div>
+        </div>
+        <div class="grid grid-2" style="margin-top:12px">
+          <div class="card"><div class="emoji">💉</div><div class="big" id="kpiDose">--</div><div class="label">DOSE ATUAL (MG)</div></div>
+          <div class="card"><div class="emoji">📅</div><div class="big" id="kpiDias">--</div><div class="label">DIAS DE TRATAMENTO</div></div>
+        </div>
+
+        <!-- Atalhos redirecionando para as novas guias -->
+        <div class="grid grid-2" style="margin-top:12px">
+          <div class="card link-card" data-open="aplicacoes"><div class="emoji">🪡</div><div class="label">Aplicações</div></div>
+          <div class="card link-card" data-open="progresso"><div class="emoji">📊</div><div class="label">Peso & Medidas</div></div>
+        </div>
+        <div class="grid grid-2" style="margin-top:12px">
+          <div class="card link-card" data-open="alimentacao"><div class="emoji">🍽️</div><div class="label">Alimentação</div></div>
+          <div class="card link-card" data-open="exercicios"><div class="emoji">💪</div><div class="label">Exercícios</div></div>
+        </div>
+        <div class="grid grid-2" style="margin-top:12px">
+          <div class="card link-card" data-open="efeitos"><div class="emoji">🧾</div><div class="label">Efeitos Adversos</div></div>
+          <div class="card link-card" data-open="guia"><div class="emoji">📘</div><div class="label">Guia</div></div>
+        </div>
+
+        <div class="hint" id="proxAppl" style="display:none">💡 Próxima aplicação: <span id="proxApplDate"></span></div>
+      </div>
+
+      <!-- APLICAÇÕES -->
+      <div class="section" id="sec-aplicacoes">
+        <h3 style="margin:0 0 10px 2px">Aplicações</h3>
+        <div class="card" style="text-align:left">
+          <div class="row row-2">
+            <div><label for="applDate">Data</label><input type="date" id="applDate" /></div>
+            <div><label for="applDose">Dose (mg)</label><input type="number" id="applDose" step="0.25" placeholder="Ex.: 2.5" /></div>
+            <div><label for="applSite">Local</label><select id="applSite"><option value="abdome">Abdome</option><option value="coxa">Coxa</option><option value="braço">Braço</option></select></div>
+            <div><label for="applNotes">Observações</label><input id="applNotes" placeholder="Ex.: leve ardência" /></div>
+          </div>
+          <div class="inline-actions" style="margin-top:10px">
+            <button class="btn primary" id="addApplBtn">Adicionar</button>
+            <button class="btn" id="reminderApplBtn">Criar lembrete semanal</button>
+          </div>
+        </div>
+        <div class="list" id="applList"></div>
+      </div>
+
+      <!-- PROGRESSO -->
+      <div class="section" id="sec-progresso">
+        <h3 style="margin:0 0 10px 2px">Peso & Medidas</h3>
+        <div class="card" style="text-align:left">
+          <div class="row row-2">
+            <div><label for="pesoDate">Data</label><input type="date" id="pesoDate" /></div>
+            <div><label for="pesoKg">Peso (kg)</label><input type="number" id="pesoKg" step="0.1" placeholder="Ex.: 78.2" /></div>
+            <div><label for="alturaCm">Altura (cm)</label><input type="number" id="alturaCm" step="0.5" placeholder="Ex.: 165" /></div>
+            <div><label for="cintura">Cintura (cm)</label><input type="number" id="cintura" step="0.1" placeholder="Opcional" /></div>
+          </div>
+          <div class="inline-actions" style="margin-top:10px">
+            <button class="btn primary" id="addPesoBtn">Salvar registro</button>
+            <button class="btn warn" id="exportPesoBtn">Exportar CSV</button>
+          </div>
+        </div>
+        <div class="card" style="margin-top:12px"><div style="font-weight:700; margin-bottom:6px">Variação de Peso</div><canvas id="pesoLineChart" width="640" height="240"></canvas></div>
+        <div class="card" style="margin-top:12px"><div style="font-weight:700; margin-bottom:6px">IMC ao longo do tempo</div><canvas id="imcLineChart" width="640" height="240"></canvas></div>
+        <div class="card" style="margin-top:12px"><div style="font-weight:700; margin-bottom:6px">Cintura ao longo do tempo</div><canvas id="cinturaLineChart" width="640" height="240"></canvas></div>
+        <div class="list" id="pesoList" style="margin-top:12px"></div>
+      </div>
+
+      <!-- ALIMENTAÇÃO (nova guia) -->
+      <div class="section" id="sec-alimentacao">
+        <h3 style="margin:0 0 10px 2px">Alimentação</h3>
+        <div class="card" style="text-align:left">
+          <div class="row row-2">
+            <div>
+              <label for="kcalSelect">Meta calórica</label>
+              <select id="kcalSelect">
+                <option value="1200">1200 kcal</option>
+                <option value="1400">1400 kcal</option>
+                <option value="1600">1600 kcal</option>
+                <option value="1800">1800 kcal</option>
+              </select>
+            </div>
+            <div style="display:flex; align-items:flex-end">
+              <button class="btn" id="saveKcalBtn">Salvar preferência</button>
+            </div>
+          </div>
+        </div>
+        <div id="mealPlanContainer" class="grid" style="margin-top:12px"></div>
+      </div>
+
+      <!-- EXERCÍCIOS (nova guia) -->
+      <div class="section" id="sec-exercicios">
+        <h3 style="margin:0 0 10px 2px">Exercícios</h3>
+        <div class="card" style="text-align:left">
+          <ul style="margin:0 0 0 18px; padding:0">
+            <li>3-5x/semana: Caminhada/corrida/ciclismo 20–40 min</li>
+            <li>2-3x/semana: Treino de força (corpo inteiro)</li>
+            <li>Alongamentos diários 5–10 min</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- EFEITOS ADVERSOS (nova guia) -->
+      <div class="section" id="sec-efeitos">
+        <h3 style="margin:0 0 10px 2px">Efeitos Adversos</h3>
+        <div class="card" style="text-align:left">
+          <div class="row row-2">
+            <div><label for="efeitoDate">Data</label><input type="date" id="efeitoDate" /></div>
+            <div><label for="efeitoTipo">Sintoma</label><select id="efeitoTipo">
+              <option>Náusea</option><option>Vômito</option><option>Dor abdominal</option><option>Refluxo/azia</option>
+              <option>Constipação</option><option>Diarreia</option><option>Outros</option></select></div>
+          </div>
+          <div style="margin-top:10px"><label for="efeitoNotes">Observações</label><textarea id="efeitoNotes" rows="2" placeholder="Intensidade, duração, gatilhos..."></textarea></div>
+          <div class="inline-actions" style="margin-top:10px"><button class="btn primary" id="addEfeitoBtn">Registrar</button></div>
+        </div>
+        <div class="list" id="efeitosList"></div>
+      </div>
+
+      <!-- GUIA -->
+      <div class="section" id="sec-guia">
+        <h3 style="margin:0 0 10px 2px">Guia de Emagrecimento</h3>
+        <div class="card" style="text-align:left">
+          <a href="https://drive.google.com/file/d/1zNONx-1Rfh0T_pR_tQXbJh0CqWQy25Dt/view?usp=drive_link" target="_blank" rel="noopener">
+            Abrir Guia de Emagrecimento (Google Drive)
+          </a>
+          <div class="hint" style="margin-top:10px">O link abrirá no navegador.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom nav com 7 abas -->
+  <div class="bottom-bar">
+    <button class="tab-btn active" data-tab="home"><div class="icon">🏠</div><div>Início</div></button>
+    <button class="tab-btn" data-tab="aplicacoes"><div class="icon">🪡</div><div>Aplicações</div></button>
+    <button class="tab-btn" data-tab="progresso"><div class="icon">📊</div><div>Progresso</div></button>
+    <button class="tab-btn" data-tab="alimentacao"><div class="icon">🍽️</div><div>Alimentação</div></button>
+    <button class="tab-btn" data-tab="exercicios"><div class="icon">💪</div><div>Exercícios</div></button>
+    <button class="tab-btn" data-tab="efeitos"><div class="icon">🧾</div><div>Efeitos</div></button>
+    <button class="tab-btn" data-tab="guia"><div class="icon">📘</div><div>Guia</div></button>
+  </div>
+
+  <script>
+    const isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent);
+    const isStandalone=window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone;
+
+    // Manifest/Service Worker (PWA simples)
+    const manifestData={name:"Meu Tratamento",short_name:"Tratamento",start_url:"./",display:"standalone",background_color:"#ffffff",theme_color:"#6b73ff",
+      icons:[{src:"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='112' fill='%236b73ff'/%3E%3Ctext x='50%25' y='55%25' text-anchor='middle' dominant-baseline='middle' font-size='260' fill='white'%3E%F0%9F%92%8A%3C/text%3E%3C/svg%3E",sizes:"512x512",type:"image/svg+xml",purpose:"any maskable"}]};
+    const manifestURL=URL.createObjectURL(new Blob([JSON.stringify(manifestData)],{type:'application/json'}));
+    document.getElementById('manifest-placeholder').setAttribute('href',manifestURL);
+
+    const swCode=`const CACHE='mt-v1';self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['./'])))});self.addEventListener('fetch',e=>{if(e.request.method!=='GET')return;e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).then(res=>{const cp=res.clone();caches.open(CACHE).then(c=>c.put(e.request,cp));return res;})).catch(()=>caches.match('./')))});`;
+    if('serviceWorker' in navigator){ const swURL=URL.createObjectURL(new Blob([swCode],{type:'text/javascript'})); navigator.serviceWorker.register(swURL).catch(()=>{}); }
+
+    // Store/State
+    const store={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch{return d}}, set(k,v){localStorage.setItem(k,JSON.stringify(v))}};
+    const state={patientName:store.get('patientName',''), kcalPlan:store.get('kcalPlan','1400'),
+      aplicacoes:store.get('aplicacoes',[]), pesos:store.get('pesos',[]), efeitos:store.get('efeitos',[])};
+
+    // Nome
+    const patientNameEl=document.getElementById('patientName'); const saveNameBtn=document.getElementById('saveNameBtn');
+    const clearNameBtn=document.getElementById('clearNameBtn'); const nameBar=document.getElementById('nameBar');
+    function renderName(){ const n=state.patientName?.trim()||'Paciente'; nameBar.textContent=n; patientNameEl.value=state.patientName||''; document.title=n+' - Meu Tratamento'; document.getElementById('headerTitle').textContent=n; }
+    function setName(v){ state.patientName=(v||'').trim(); store.set('patientName',state.patientName); renderName(); }
+    saveNameBtn.addEventListener('click',()=>setName(patientNameEl.value)); clearNameBtn.addEventListener('click',()=>setName(''));
+    document.addEventListener('DOMContentLoaded',()=>{ renderName(); if(isIOS&&!isStandalone){ document.getElementById('iosHint').style.display='block'; } });
+
+    // Navegação (7 abas)
+    const sections={home:'sec-home', aplicacoes:'sec-aplicacoes', progresso:'sec-progresso', alimentacao:'sec-alimentacao', exercicios:'sec-exercicios', efeitos:'sec-efeitos', guia:'sec-guia'};
+    function switchTo(tab){
+      document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+      document.getElementById(sections[tab]).classList.add('active');
+      document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+      const btn=document.querySelector(`.tab-btn[data-tab="${tab}"]`); if(btn) btn.classList.add('active');
+      if(tab==='progresso'){ requestAnimationFrame(()=>{ drawAllCharts(); updateKPIs(); }); }
+      if(tab==='home'||tab==='alimentacao'||tab==='exercicios'||tab==='efeitos'){ updateKPIs(); }
+    }
+    document.querySelectorAll('.tab-btn').forEach(b=> b.addEventListener('click',()=>switchTo(b.dataset.tab)));
+
+    // Atalhos da Home agora mudam de aba
+    document.querySelectorAll('#sec-home .link-card').forEach(c=>{
+      c.addEventListener('click', ()=> switchTo(c.getAttribute('data-open')));
+    });
+
+    // Aplicações
+    const applDate=document.getElementById('applDate'); const applDose=document.getElementById('applDose');
+    const applSite=document.getElementById('applSite'); const applNotes=document.getElementById('applNotes'); const applList=document.getElementById('applList');
+    document.getElementById('addApplBtn').addEventListener('click',()=>{ if(!applDate.value||!applDose.value){alert('Informe data e dose.');return;}
+      state.aplicacoes.push({date:applDate.value,dose:parseFloat(applDose.value),site:applSite.value,notes:applNotes.value});
+      store.set('aplicacoes',state.aplicacoes); applDate.value=''; applDose.value=''; applNotes.value=''; renderAplicacoes(); updateKPIs(); renderProx(); });
+    document.getElementById('reminderApplBtn').addEventListener('click',()=>alert('Crie um lembrete semanal no seu calendário com a dose atual.'));
+    function renderAplicacoes(){ applList.innerHTML=''; [...state.aplicacoes].sort((a,b)=>b.date.localeCompare(a.date)).forEach(r=>{ const div=document.createElement('div'); div.className='item';
+      div.innerHTML=`<div><div><strong>${r.date}</strong> • ${r.dose} mg • ${r.site}</div><div class="small">${r.notes||''}</div></div><button class="btn danger">Excluir</button>`;
+      div.querySelector('button').addEventListener('click',()=>{ const i=state.aplicacoes.findIndex(x=>x.date===r.date&&x.dose===r.dose&&x.site===r.site&&x.notes===r.notes); if(i>=0) state.aplicacoes.splice(i,1); store.set('aplicacoes',state.aplicacoes); renderAplicacoes(); updateKPIs(); renderProx(); });
+      applList.appendChild(div); }); }
+    function renderProx(){ const wrap=document.getElementById('proxAppl'); if(!state.aplicacoes.length){wrap.style.display='none';return;}
+      const arr=[...state.aplicacoes].sort((a,b)=>a.date.localeCompare(b.date)); const last=arr[arr.length-1]; const next=new Date(last.date); next.setDate(next.getDate()+7);
+      const dd=next.toISOString().slice(0,10).split('-').reverse().join('/'); document.getElementById('proxApplDate').textContent=dd; wrap.style.display='flex'; }
+
+    // Progresso
+    const pesoDate=document.getElementById('pesoDate'); const pesoKg=document.getElementById('pesoKg');
+    const alturaCm=document.getElementById('alturaCm'); const cintura=document.getElementById('cintura'); const pesoList=document.getElementById('pesoList');
+    document.getElementById('addPesoBtn').addEventListener('click',()=>{ if(!pesoDate.value||!pesoKg.value){alert('Informe data e peso.');return;}
+      const rec={date:pesoDate.value,peso:parseFloat(pesoKg.value),alturaCm:alturaCm.value?parseFloat(alturaCm.value):null,cintura:cintura.value?parseFloat(cintura.value):null};
+      const idx=state.pesos.findIndex(p=>p.date===rec.date); if(idx>=0) state.pesos[idx]=rec; else state.pesos.push(rec);
+      store.set('pesos',state.pesos); pesoKg.value=''; cintura.value=''; renderPesos(); requestAnimationFrame(()=>{ drawAllCharts(); updateKPIs(); }); });
+    document.getElementById('exportPesoBtn').addEventListener('click',()=>{ const rows=[['Data','Peso(kg)','Altura(cm)','Cintura(cm)','IMC']]; [...state.pesos].sort((a,b)=>a.date.localeCompare(b.date)).forEach(r=>{ const imc=calcIMC(r.peso,r.alturaCm); rows.push([r.date,r.peso,r.alturaCm||'',r.cintura||'',imc?imc.toFixed(2):'']); }); const csv=rows.map(r=>r.join(',')).join('\n'); const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='peso_medidas.csv'; a.click(); URL.revokeObjectURL(url); });
+    function renderPesos(){ pesoList.innerHTML=''; [...state.pesos].sort((a,b)=>b.date.localeCompare(a.date)).forEach(r=>{ const imc=calcIMC(r.peso,r.alturaCm); const div=document.createElement('div'); div.className='item';
+      div.innerHTML=`<div><div><strong>${r.date}</strong> • ${r.peso.toFixed(1)} kg${r.alturaCm?' • '+r.alturaCm+' cm':''}${r.cintura?' • Cintura '+r.cintura+' cm':''}</div><div class="small">IMC: ${imc?imc.toFixed(1):'—'}</div></div><button class="btn danger">Excluir</button>`;
+      div.querySelector('button').addEventListener('click',()=>{ const i=state.pesos.findIndex(x=>x.date===r.date); if(i>=0) state.pesos.splice(i,1); store.set('pesos',state.pesos); renderPesos(); requestAnimationFrame(()=>{ drawAllCharts(); updateKPIs(); }); }); pesoList.appendChild(div); }); }
+    function calcIMC(peso,alturaCm){ if(!peso||!alturaCm) return null; const h=alturaCm/100; return peso/(h*h); }
+
+    function updateKPIs(){ const dose=state.aplicacoes.length?state.aplicacoes[state.aplicacoes.length-1].dose:null;
+      document.getElementById('kpiDose').textContent=dose!=null?dose.toFixed(1):'--';
+      if(state.aplicacoes.length){ const first=new Date([...state.aplicacoes].sort((a,b)=>a.date.localeCompare(b.date))[0].date); const diff=Math.max(0,Math.round((Date.now()-first.getTime())/(1000*60*60*24))); document.getElementById('kpiDias').textContent=diff; } else document.getElementById('kpiDias').textContent='--';
+      if(!state.pesos.length){ document.getElementById('kpiPeso').textContent='--'; document.getElementById('kpiPerda').textContent='--'; return; }
+      const arr=[...state.pesos].sort((a,b)=>a.date.localeCompare(b.date)); const first=arr[0], last=arr[arr.length-1];
+      document.getElementById('kpiPeso').textContent=last.peso.toFixed(1); document.getElementById('kpiPerda').textContent=(first.peso-last.peso).toFixed(1);
+    }
+
+    const pesoLineCanvas=document.getElementById('pesoLineChart');
+    const imcLineCanvas=document.getElementById('imcLineChart');
+    const cinturaLineCanvas=document.getElementById('cinturaLineChart');
+
+    function drawLineChart(canvas,labels,series,color='#4f46e5'){
+      const ctx=canvas.getContext('2d'); const w=canvas.width,h=canvas.height; ctx.clearRect(0,0,w,h);
+      const padL=40,padR=16,padT=16,padB=28; ctx.strokeStyle='#e5e7eb'; ctx.strokeRect(0.5,0.5,w-1,h-1);
+      ctx.strokeStyle='#f1f5f9'; ctx.beginPath(); for(let i=0;i<5;i++){ const y=padT+i*(h-padT-padB)/4; ctx.moveTo(padL,y); ctx.lineTo(w-padR,y);} ctx.stroke();
+      if(!series.length) return; const min=Math.min(...series),max=Math.max(...series); const yMin=min-(max-min)*0.1, yMax=(max-min===0?max+1:max+(max-min)*0.1);
+      const xScale=i=> padL+i*((w-padL-padR)/Math.max(1,series.length-1)); const yScale=v=> padT+(yMax-v)*((h-padT-padB)/(yMax-yMin));
+      ctx.fillStyle='#94a3b8'; ctx.font='12px system-ui'; for(let i=0;i<=4;i++){ const v=yMin+i*(yMax-yMin)/4; ctx.fillText(v.toFixed(1),6,yScale(v)+4); }
+      ctx.fillStyle='#94a3b8'; labels.forEach((lb,i)=>{ const x=xScale(i); ctx.save(); ctx.translate(x,h-6); ctx.rotate(-Math.PI/6); ctx.textAlign='right'; ctx.fillText(lb,0,0); ctx.restore(); });
+      ctx.strokeStyle=color; ctx.lineWidth=2; ctx.beginPath(); series.forEach((v,i)=>{ const x=xScale(i),y=yScale(v); if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y); }); ctx.stroke();
+      ctx.fillStyle=color; series.forEach((v,i)=>{ const x=xScale(i),y=yScale(v); ctx.beginPath(); ctx.arc(x,y,3,0,Math.PI*2); ctx.fill(); });
+    }
+    function drawAllCharts(){
+      const arr=[...state.pesos].sort((a,b)=>a.date.localeCompare(b.date));
+      const labels=arr.map(r=>r.date); const sPeso=arr.map(r=>r.peso);
+      const sIMC=arr.map(r=>calcIMC(r.peso,r.alturaCm)).map(v=>v?Number(v.toFixed(2)):null);
+      const sCintRaw=arr.map(r=> r.cintura!=null?Number(r.cintura):null);
+      const fill=(serie)=>{ const out=[]; let last=null; for(const v of serie){ if(v==null) out.push(last==null?0:last); else{ last=v; out.push(v);} } return out; };
+      drawLineChart(pesoLineCanvas,labels,sPeso,'#3b82f6'); drawLineChart(imcLineCanvas,labels,fill(sIMC),'#10b981'); drawLineChart(cinturaLineCanvas,labels,fill(sCintRaw),'#f59e0b');
+    }
+
+    // Alimentação
+    const kcalSelect=document.getElementById('kcalSelect'); const mealPlanContainer=document.getElementById('mealPlanContainer'); const saveKcalBtn=document.getElementById('saveKcalBtn');
+    const MEAL_PLANS={"1200":[{refeicao:"Café da manhã",itens:["1 ovo mexido","1 fatia pão integral","1 xícara café s/ açúcar"]},{refeicao:"Almoço",itens:["100g frango grelhado","salada verde","80g arroz integral"]},{refeicao:"Lanche",itens:["1 maçã"]},{refeicao:"Jantar",itens:["120g peixe assado","legumes cozidos","1 col. sobremesa azeite"]}],
+      "1400":[{refeicao:"Café da manhã",itens:["1 iogurte natural","2 colheres granola","1 banana pequena"]},{refeicao:"Almoço",itens:["120g carne magra","salada colorida","100g batata doce"]},{refeicao:"Lanche",itens:["20g castanhas"]},{refeicao:"Jantar",itens:["omelete 2 ovos c/ legumes","salada","1 fruta cítrica"]}],
+      "1600":[{refeicao:"Café da manhã",itens:["Vitamina (leite+aveia+fruta)","1 fatia pão integral c/ ricota"]},{refeicao:"Almoço",itens:["120g frango","100g arroz integral","1 concha feijão","salada"]},{refeicao:"Lanche",itens:["1 iogurte + 1 fruta"]},{refeicao:"Jantar",itens:["150g carne magra","legumes assados","80g quinoa cozida"]}],
+      "1800":[{refeicao:"Café da manhã",itens:["2 ovos mexidos","tapioca média c/ queijo branco","suco natural 200 ml"]},{refeicao:"Almoço",itens:["150g peixe","120g arroz branco","1 concha feijão","salada"]},{refeicao:"Lanche",itens:["Sanduíche integral pequeno (queijo/peito de peru)"]},{refeicao:"Jantar",itens:["150g frango","100g purê batata","legumes na manteiga"]}]};
+    function renderMealPlan(){ const kcal=state.kcalPlan||'1400'; if(kcalSelect) kcalSelect.value=kcal; mealPlanContainer.innerHTML=''; (MEAL_PLANS[kcal]||[]).forEach(b=>{ const c=document.createElement('div'); c.className='card'; c.style.textAlign='left';
+      c.innerHTML=`<div style="font-weight:700; margin-bottom:6px">${b.refeicao}</div><div class="label" style="font-size:13px; color:#475569">${b.itens.join(' • ')}</div>`; mealPlanContainer.appendChild(c); }); }
+    if(kcalSelect){ kcalSelect.addEventListener('change',()=>{ state.kcalPlan=kcalSelect.value; renderMealPlan(); }); saveKcalBtn.addEventListener('click',()=>{ store.set('kcalPlan',state.kcalPlan); alert('Preferência salva.'); }); }
+
+    // Efeitos
+    const efeitoDate=document.getElementById('efeitoDate'); const efeitoTipo=document.getElementById('efeitoTipo');
+    const efeitoNotes=document.getElementById('efeitoNotes'); const efeitosList=document.getElementById('efeitosList');
+    const addEfeitoBtn=document.getElementById('addEfeitoBtn');
+    if(addEfeitoBtn){ addEfeitoBtn.addEventListener('click',()=>{ if(!efeitoDate.value){alert('Informe a data.');return;}
+      state.efeitos.push({date:efeitoDate.value,tipo:efeitoTipo.value,notes:efeitoNotes.value}); store.set('efeitos',state.efeitos); efeitoDate.value=''; efeitoNotes.value=''; renderEfeitos(); }); }
+    function renderEfeitos(){ if(!efeitosList) return; efeitosList.innerHTML=''; [...state.efeitos].sort((a,b)=>b.date.localeCompare(a.date)).forEach(r=>{ const div=document.createElement('div'); div.className='item';
+      div.innerHTML=`<div><div><strong>${r.date}</strong> • ${r.tipo}</div><div class="small">${r.notes||''}</div></div><button class="btn danger">Excluir</button>`;
+      div.querySelector('button').addEventListener('click',()=>{ const i=state.efeitos.findIndex(x=>x.date===r.date&&x.tipo===r.tipo&&x.notes===r.notes); if(i>=0) state.efeitos.splice(i,1); store.set('efeitos',state.efeitos); renderEfeitos(); }); efeitosList.appendChild(div); }); }
+
+    // KPIs e init
+    function init(){ renderName(); renderAplicacoes(); renderProx(); renderPesos(); renderEfeitos(); renderMealPlan(); updateKPIs(); }
+    init();
+  </script>
+</body>
+</html>
